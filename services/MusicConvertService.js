@@ -122,8 +122,9 @@ const uploadMyFileConvertMusicService = async (filesData, uno) => {
     let filesDetail = []
     // 循环待转码文件 存入待转码文件夹
     for (let i = 0; i < filesData.length; i++) {
+      let target_file_name = Date.now() + filesData[i].origin_file_name
       const originMusicPath = path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, uno, filesData[i].origin_file_name)
-      const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_PARSE_MUSIC_FOLDER, filesData[i].origin_file_name)
+      const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_PARSE_MUSIC_FOLDER, target_file_name)
       // 存储待解析音乐文件
       fs.copyFileSync(originMusicPath, musicPath)
       // 存储上传转码音乐文件信息
@@ -132,7 +133,7 @@ const uploadMyFileConvertMusicService = async (filesData, uno) => {
         status: 1,
         codec: filesData[i].music_codec,
         size: filesData[i].song_size,
-        musicFileName: filesData[i].origin_file_name
+        musicFileName: target_file_name
       })
     }
     return {
