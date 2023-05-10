@@ -39,6 +39,7 @@ const redisHandler = () => {
           lpush: await promisify(client.lpush).bind(client),
           rpush: await promisify(client.rpush).bind(client),
           lpop: await promisify(client.lpop).bind(client),
+          blpop:await promisify(client.blpop).bind(client),
           rpop: await promisify(client.rpop).bind(client),
           lindex: await promisify(client.lindex).bind(client),
           llen: await promisify(client.llen).bind(client),

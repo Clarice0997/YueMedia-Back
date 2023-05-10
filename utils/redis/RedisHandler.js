@@ -111,6 +111,24 @@ async function lpopRedis(key) {
 }
 
 /**
+ * Redis Blpop
+ * @param key
+ * @param sec
+ * @returns {Promise<*>}
+ */
+async function blpopRedis(key,sec=100) {
+  try {
+    const redis = await redisHandler()
+    const data = await redis.blpop(key,sec)
+    await redis.release()
+    return data
+  } catch (err) {
+    console.log(`Redis Blpop Error => ${err}`)
+    throw err
+  }
+}
+
+/**
  * Redis Rpop
  * @param {*} key
  * @returns
@@ -283,6 +301,7 @@ module.exports = {
   lpushRedis,
   rpushRedis,
   lpopRedis,
+  blpopRedis,
   rpopRedis,
   lindexRedis,
   llenRedis,
