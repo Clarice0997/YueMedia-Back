@@ -24,9 +24,14 @@ const { MulterError } = require('multer')
 const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 },
   fileFilter: function (req, file, cb) {
+    // NCM 文件校验
+    if (file.mimetype === 'application/octet-stream' && path.extname(file.originalname).toLowerCase().substring(1) === 'ncm') {
+      return cb(null, true)
+    }
+
     // TODO: 校验重构
-    const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac', 'application/octet-stream']
-    const allowedFiletypes = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'aiff', 'alac', 'ncm']
+    const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac']
+    const allowedFiletypes = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'aiff', 'alac']
 
     const mimetype = allowedMimetypes.indexOf(file.mimetype) !== -1
     const extname = allowedFiletypes.indexOf(path.extname(file.originalname).toLowerCase().substring(1)) !== -1
