@@ -1,6 +1,6 @@
 // import module
 const router = require('express').Router()
-const { loginService, registerService, updateUserDataService, updateUserPasswordService } = require('../services/UserService')
+const { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService } = require('../services/UserService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -120,6 +120,48 @@ router.put('/account/password', auth, async (req, res) => {
   // Service
   try {
     const { code, data } = await updateUserPasswordService(password, newPassword, req.authorization.uno)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/user/verify/phone 占用手机校验接口
+ * @apiName VerifyPhone
+ * @apiGroup User
+ * @apiName User/VerifyPhone
+ * @apiPermission All
+ * @apiParam {String} phone 待校验手机号
+ */
+router.get('/verify/phone', async (req, res) => {
+  // 获取查询电话
+  const { phone } = req.query
+  // Service
+  try {
+    const { code, data } = await verifyPhoneService(phone)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/user/verify/email 占用邮箱校验接口
+ * @apiName VerifyEmail
+ * @apiGroup User
+ * @apiName User/VerifyEmail
+ * @apiPermission All
+ * @apiParam {String} email 待校验邮箱
+ */
+router.get('/verify/email', async (req, res) => {
+  // 获取查询邮箱
+  const { email } = req.query
+  // Service
+  try {
+    const { code, data } = await verifyEmailService(email)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

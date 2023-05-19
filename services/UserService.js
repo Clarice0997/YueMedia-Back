@@ -293,4 +293,91 @@ const updateUserPasswordService = async (password, newPassword, uno) => {
   }
 }
 
-module.exports = { loginService, registerService, updateUserDataService, updateUserPasswordService }
+/**
+ * 占用手机校验 Service
+ * @param phone
+ * @returns
+ */
+const verifyPhoneService = async phone => {
+  try {
+    // 数据合法性校验
+    if (!phone) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法！'
+        }
+      }
+    }
+    // 判断电话是否已被使用
+    if ((await mysqlHandler(`select * from users where phone = ?`, [phone])).length !== 0) {
+      return {
+        code: 409,
+        data: {
+          message: '电话已被使用'
+        }
+      }
+    }
+
+    return {
+      code: 200,
+      data: {
+        message: '电话可用！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 占用邮箱校验 Service
+ * @param email
+ * @returns
+ */
+const verifyEmailService = async email => {
+  try {
+    // 数据合法性校验
+    if (!email) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法！'
+        }
+      }
+    }
+
+    // 判断邮箱是否已被使用
+    if ((await mysqlHandler(`select * from users where email = ?`, [email])).length !== 0) {
+      return {
+        code: 409,
+        data: {
+          message: '邮箱已被使用'
+        }
+      }
+    }
+
+    return {
+      code: 200,
+      data: {
+        message: '邮箱可用！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService }
