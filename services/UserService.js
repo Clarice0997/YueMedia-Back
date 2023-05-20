@@ -134,6 +134,8 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
 
+    // TODO: 注册错误限制注册
+
     // 判断用户是否已被注册
     if ((await mysqlHandler(`select * from users where username = ?`, [username])).length !== 0) {
       return {
@@ -143,24 +145,7 @@ async function registerService({ username, password, nickname, phone, email }) {
         }
       }
     }
-    // 判断电话是否已被使用
-    if ((await mysqlHandler(`select * from users where phone = ?`, [phone])).length !== 0) {
-      return {
-        code: 409,
-        data: {
-          message: '电话已被使用！'
-        }
-      }
-    }
-    // 判断邮箱是否已被使用
-    if ((await mysqlHandler(`select * from users where email = ?`, [email])).length !== 0) {
-      return {
-        code: 409,
-        data: {
-          message: '邮箱已被使用！'
-        }
-      }
-    }
+
     // 注册新用户，新增用户数据
     const uno = await uuidv4()
     const query = 'insert into users(uno,username,password,nickname,phone,email) values(?,?,?,?,?,?)'
