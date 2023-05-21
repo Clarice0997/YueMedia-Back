@@ -44,7 +44,7 @@ router.post('/account/register', async (req, res) => {
   const body = req.body
   // Service
   try {
-    const { code, data } = await registerService(body)
+    const { code, data } = await registerService(body, req.ip)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

@@ -120,9 +120,10 @@ async function loginService(username, password, ip) {
 /**
  * 注册 Service
  * @param {*} param0
+ * @param ip
  * @returns
  */
-async function registerService({ username, password, nickname, phone, email }) {
+async function registerService({ username, password, nickname, phone, email }, ip) {
   try {
     // 判断参数是否存在
     if (!(username && password && nickname && phone && email)) {
@@ -134,10 +135,25 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
 
-    // TODO: 注册错误限制注册
+    // IP 锁定
+    if (+(await hgetRedis('register_ip_limit_lock', ip)) >= +process.env.RegisterIpLimitTime) {
+      return {
+        code: 400,
+        data: {
+          message: '注册已锁定，请稍后重试！'
+        }
+      }
+    }
 
     // 判断用户是否已被注册
     if ((await mysqlHandler(`select * from users where username = ?`, [username])).length !== 0) {
+      // IP 锁定
+      const registerIpTimes = await hgetRedis('register_ip_limit_lock', ip)
+      if (registerIpTimes) {
+        await hsetRedis('register_ip_limit_lock', ip, +registerIpTimes + 1, process.env.RegisterIpLimit)
+      } else {
+        await hsetRedis('register_ip_limit_lock', ip, 1, process.env.RegisterIpLimit)
+      }
       return {
         code: 409,
         data: {
