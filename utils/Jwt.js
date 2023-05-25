@@ -2,13 +2,13 @@
 const jwt = require('jsonwebtoken')
 
 /**
- * 生成 JWT
+ * 生成 JWT （默认生成 Access Token）
  * @param payload
  * @param key
  * @param maxAge
  * @returns
  */
-const generateJsonWebToken = async (payload, key = process.env.JWT_key, maxAge = 3600) => {
+const generateJsonWebToken = async (payload, key = process.env.JWT_key, maxAge = '60m') => {
   return new Promise((resolve, reject) => {
     jwt.sign(payload, key, { expiresIn: maxAge }, (err, token) => {
       if (err) reject(err)

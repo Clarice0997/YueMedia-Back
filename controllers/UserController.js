@@ -21,7 +21,8 @@ router.post('/account/login', async (req, res) => {
     const { code, data } = await loginService(username, password, req.ip)
     // response
     // set JsonWebToken
-    if (data.token) res.cookie('Access-Token', data.token)
+    res.cookie('Access-Token', data.token)
+    res.cookie('Refresh-Token', data.RefreshToken)
     res.status(code).send({ ...data, code })
   } catch (error) {
     errorHandler(error, req, res)

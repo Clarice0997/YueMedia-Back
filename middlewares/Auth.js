@@ -1,6 +1,7 @@
 // import modules
 const { decryptJsonWebToken } = require('../utils/Jwt')
 
+// 校验封装函数
 const authHandler = async (req, key = process.env.JWT_key) => {
   // 获取 JWT
   let authorization = req.headers.authorization

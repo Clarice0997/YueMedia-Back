@@ -75,13 +75,25 @@ async function loginService(username, password, ip) {
         status: user[0].status,
         type: user[0].type
       })
+      let RefreshToken = await generateJsonWebToken(
+        {
+          uno: user[0].uno,
+          username: user[0].username,
+          nickname: user[0].nickname,
+          status: user[0].status,
+          type: user[0].type
+        },
+        process.env.Refresh_key,
+        '7d'
+      )
       await loginRecord(user[0].uno, user[0].username, ip)
       calculateLoginRecords()
       return {
         code: 200,
         data: {
           message: '登录成功！',
-          token
+          token,
+          RefreshToken
         }
       }
     } else {
