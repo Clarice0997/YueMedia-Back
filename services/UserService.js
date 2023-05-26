@@ -2,7 +2,7 @@
 const { hashSync, compareSync } = require('bcrypt')
 const { mysqlHandler } = require('../config/mysql')
 const { v4: uuidv4 } = require('uuid')
-const { generateJsonWebToken } = require('../utils/Jwt')
+const { generateJsonWebToken, decryptJsonWebToken } = require('../utils/Jwt')
 const { loginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { calculateLoginRecords } = require('../utils/redis/calculator/calculateLoginRecords')
@@ -393,4 +393,70 @@ const verifyEmailService = async email => {
   }
 }
 
-module.exports = { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService }
+/**
+ * 无感刷新 Service
+ * @param refreshToken
+ * @returns
+ */
+const refreshTokenService = async refreshToken => {
+  try {
+    // 如果不存在 Refresh Token 则返回错误
+    if (!refreshToken)
+      return {
+        code: 400,
+        data: {
+          message: '无感刷新失效'
+        }
+      }
+    // 校验 Refresh Token 是否可用
+    const userData = await decryptJsonWebToken(refreshToken, process.env.Refresh_key)
+    // 生成新的 AccessToken 和 FreshToken
+    const AccessToken = await generateJsonWebToken({
+      uno: userData.uno,
+      username: userData.username,
+      nickname: userData.nickname,
+      status: userData.status,
+      type: userData.type
+    })
+    const newFreshToken = await generateJsonWebToken(
+      {
+        uno: userData.uno,
+        username: userData.username,
+        nickname: userData.nickname,
+        status: userData.status,
+        type: userData.type
+      },
+      process.env.Refresh_key,
+      '7d'
+    )
+    // 返回刷新 Token 数据
+    return {
+      code: 200,
+      data: {
+        RefreshToken: newFreshToken,
+        AccessToken,
+        message: '无感刷新成功'
+      }
+    }
+  } catch (error) {
+    // 校验失败错误处理
+    if (error.name === 'JsonWebTokenError' && error.message === 'invalid token') {
+      return {
+        code: 400,
+        data: {
+          message: '无感刷新失效'
+        }
+      }
+    }
+    // 通用错误处理函数
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService, refreshTokenService }

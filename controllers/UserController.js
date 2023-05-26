@@ -1,6 +1,6 @@
 // import module
 const router = require('express').Router()
-const { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService } = require('../services/UserService')
+const { loginService, registerService, updateUserDataService, updateUserPasswordService, verifyPhoneService, verifyEmailService, refreshTokenService } = require('../services/UserService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -163,6 +163,30 @@ router.get('/verify/email', async (req, res) => {
   // Service
   try {
     const { code, data } = await verifyEmailService(email)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/user/refresh_token 无感刷新接口
+ * @apiName RefreshToken
+ * @apiGroup User
+ * @apiName User/RefreshToken
+ * @apiPermission All
+ * @apiHeader {String} Refresh_Token Cookie&刷新Token
+ */
+router.get('/refresh_token', async (req, res) => {
+  try {
+    const { code, data } = await refreshTokenService(req.cookies['Refresh_Token'])
+    // 删除旧 Cookie
+    res.clearCookie('Access-Token')
+    res.clearCookie('Refresh-Token')
+    // 设置 Cookie
+    res.cookie('Access-Token', data.AccessToken)
+    res.cookie('Refresh-Token', data.RefreshToken)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
