@@ -180,13 +180,12 @@ router.get('/verify/email', async (req, res) => {
  */
 router.get('/refresh_token', async (req, res) => {
   try {
-    const { code, data } = await refreshTokenService(req.cookies['Refresh_Token'])
-    // 删除旧 Cookie
-    res.clearCookie('Access-Token')
-    res.clearCookie('Refresh-Token')
-    // 设置 Cookie
-    res.cookie('Access-Token', data.AccessToken)
-    res.cookie('Refresh-Token', data.RefreshToken)
+    const { code, data } = await refreshTokenService(req.cookies['Refresh-Token'])
+    if (data.AccessToken && data.RefreshToken) {
+      // 设置 Cookie
+      res.cookie('Access-Token', data.AccessToken)
+      res.cookie('Refresh-Token', data.RefreshToken)
+    }
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
