@@ -3,6 +3,9 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const app = express()
 
+// 启动时间
+const startUsage = process.cpuUsage()
+
 // 导入环境变量
 require('dotenv').config()
 
@@ -91,3 +94,13 @@ app.listen(process.env.PORT, err => {
   }
   console.log(`Server is running at http://localhost:${process.env.PORT}`)
 })
+
+// 启动结束时间
+const endUsage = process.cpuUsage(startUsage)
+console.log(`程序启动时间: ${endUsage.user / 1000}ms`)
+
+// 程序占用内存
+console.log(`Memory used: ${process.memoryUsage().heapUsed / 1024 / 1024} MB`)
+setInterval(() => {
+  console.log(`内存占用: ${process.memoryUsage().heapUsed / 1024 / 1024} MB`)
+}, 60 * 1000)
