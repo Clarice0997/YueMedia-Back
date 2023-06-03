@@ -7,5 +7,5 @@ mongoose
     console.log(`MongoDB has been connected. Database name: ${process.env.MongoDbDatabase}`)
   })
   .catch(error => {
-    console.log(`MongoDB Rrror: ${error}`)
+    console.log(`MongoDB Error: ${error}`)
   })

@@ -2,6 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const app = express()
+const pidusage = require('pidusage')
+const path = require('path')
 
 // 启动时间
 const startUsage = process.cpuUsage()
@@ -10,7 +12,6 @@ const startUsage = process.cpuUsage()
 require('dotenv').config()
 
 // 默认静态文件位置（可配置，默认与项目文件平级）
-const path = require('path')
 process.env.DEFAULT_STATIC_PATH = path.join(__dirname, '..', 'static')
 
 // 默认项目根目录
@@ -99,8 +100,14 @@ app.listen(process.env.PORT, err => {
 const endUsage = process.cpuUsage(startUsage)
 console.log(`程序启动时间: ${endUsage.user / 1000}ms`)
 
-// 程序占用内存
-console.log(`内存占用: ${process.memoryUsage().heapUsed / 1024 / 1024} MB`)
-setInterval(() => {
-  console.log(`内存占用: ${process.memoryUsage().heapUsed / 1024 / 1024} MB`)
+// 程序占用CPU 内存
+pidusage(process.pid).then(data => {
+  console.log(`CPU 占用：${data.cpu.toFixed(1)} %`)
+  console.log(`内存占用: ${(data.memory / 1024 / 1024).toFixed(3)} MB`)
+})
+
+setInterval(async () => {
+  const processStatus = await pidusage(process.pid)
+  console.log(`CPU 占用：${processStatus.cpu.toFixed(1)} %`)
+  console.log(`内存占用: ${(processStatus.memory / 1024 / 1024).toFixed(3)} MB`)
 }, 60 * 1000)
